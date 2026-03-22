@@ -1,15 +1,12 @@
 import express from "express";
-import prisma from "../database/client.js";
+import TaskController from "../controllers/taskController.js";
 
 const routes = express.Router();
 
-routes.get("/tasks", async (req, res) => {
-  try {
-    const tasks = await prisma.task.findMany();
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ error: "Erro ao buscar tarefas" });
-  }
-});
+routes.get('/tasks', TaskController.getTasks)
+routes.get('/tasks/:day', TaskController.getTasksByDay)
+routes.post('/tasks', TaskController.createTask)
+routes.put('/tasks/:id', TaskController.updateTask)
+routes.delete('/tasks/:id', TaskController.deleteTask)
 
 export default routes;
