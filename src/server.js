@@ -1,18 +1,22 @@
-import express from 'express'
+import express from "express";
 import "dotenv/config";
-import routes from './routes/task.js'
+import { initWhatsapp } from "./bot/whatsapp.js";
+import { startTasksScheduler } from "./services/scheduler.js";
+import routes from "./routes/task.js";
 
-const app = express()
-const PORT = process.env.PORT
+const app = express();
+const PORT = process.env.PORT;
 
-app.use(express.json())
+app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("API running!")
-})
+  res.send("API running!");
+});
 
-app.use('/api', routes)
+app.use("/api", routes);
 
 app.listen(PORT, () => {
   console.log("Server on http://localhost:3000");
-})
+  initWhatsapp();
+  startTasksScheduler()
+});
