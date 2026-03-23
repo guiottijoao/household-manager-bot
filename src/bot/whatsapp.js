@@ -6,7 +6,9 @@ const client = new Client({
   puppeteer: {
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   },
-  authStrategy: new LocalAuth(),
+  authStrategy: new LocalAuth({
+    clientId: "household-manager"
+  }),
 });
 
 client.on("qr", (qr) => {
