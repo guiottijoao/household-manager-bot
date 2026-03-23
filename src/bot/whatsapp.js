@@ -4,10 +4,12 @@ import qrcode from "qrcode-terminal";
 const { Client, LocalAuth } = pkg;
 const client = new Client({
   puppeteer: {
+    executablePath: "/usr/bin/chromium",
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   },
   authStrategy: new LocalAuth({
-    clientId: "household-manager"
+    clientId: "household-manager",
+    dataPath: "/data/.wwebjs_auth"
   }),
 });
 
