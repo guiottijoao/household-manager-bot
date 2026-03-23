@@ -19,8 +19,7 @@ const date = new Date();
 const cronScheduleExpression = `0 7 * * ${date.getDay()}`;
 
 export function startTasksScheduler() {
-  console.log("Function running")
-  cron.schedule("* * * * *", async () => {
+  cron.schedule(cronScheduleExpression, async () => {
     console.log("⏰ Running automatic tasks sending..");
     
     const today = weekDays[date.getDay()];
