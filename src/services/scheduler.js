@@ -16,7 +16,7 @@ const weekDays = {
 
 const date = new Date();
 
-const cronScheduleExpression = `0 7 * * ${date.getDay()}`;
+const cronScheduleExpression = `* * * * ${date.getDay()}`;
 
 export function startTasksScheduler() {
   cron.schedule(cronScheduleExpression, async () => {
