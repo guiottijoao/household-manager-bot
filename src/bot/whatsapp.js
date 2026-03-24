@@ -10,6 +10,8 @@ const client = new Client({
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
     ],
   },
   authStrategy: new LocalAuth({
@@ -21,7 +23,17 @@ const client = new Client({
 client.on("qr", (qr) => {
   console.log("QR RECIEVED TYPE SHIII");
   qrcode.generate(qr, { small: true });
-  console.log('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + qr);
+  console.log(
+    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + qr,
+  );
+});
+
+client.on("auth_failure", (msg) => {
+  console.log("AUTH FAILURE:", msg);
+});
+
+client.on("disconnected", (reason) => {
+  console.log("DISCONNECTED:", reason);
 });
 
 export const initWhatsapp = () => {
