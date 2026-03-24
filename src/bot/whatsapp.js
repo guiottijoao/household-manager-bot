@@ -5,17 +5,11 @@ import { startTasksScheduler } from "../services/scheduler.js";
 const { Client, LocalAuth } = pkg;
 const client = new Client({
   puppeteer: {
-    executablePath: "/usr/bin/chromium",
+    // executablePath: "/usr/bin/chromium",
     headless: true,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-accelerated-2d-canvas",
-      "--no-first-run",
-      "--no-zygote",
-      "--single-process",
-      "--disable-gpu",
     ],
   },
   authStrategy: new LocalAuth({
