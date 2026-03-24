@@ -32,12 +32,13 @@ client.on("qr", (qr) => {
 
 export const initWhatsapp = () => {
   console.log("Initializing Whatsapp..");
+
+  client.once("ready", async () => {
+    console.log("Client is ready no cap❌⛑");
+    startTasksScheduler();
+  });
+  
   client.initialize();
 };
-
-client.once("ready", async () => {
-  console.log("Client is ready no cap❌⛑");
-  startTasksScheduler();
-});
 
 export default client;
