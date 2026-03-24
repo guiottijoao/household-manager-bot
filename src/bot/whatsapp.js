@@ -5,7 +5,7 @@ import { startTasksScheduler } from "../services/scheduler.js";
 const { Client, LocalAuth } = pkg;
 const client = new Client({
   puppeteer: {
-    executablePath: "/usr/bin/chromium",
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium",
     headless: true,
     args: [
       "--no-sandbox",
@@ -36,12 +36,19 @@ client.on("disconnected", (reason) => {
   console.log("DISCONNECTED:", reason);
 });
 
-export const initWhatsapp = () => {
+export const initWhatsapp = async () => {
   console.log("Initializing Whatsapp..");
+  console.log("Executando chromium em:", process.env.PUPPETEER_EXECUTABLE_PATH);
 
-  client.initialize();
+  try {
+    await client.initialize();
+    console.log("Initialize chamado");
+  } catch (err) {
+    console.error("ERRO AO INICIALIZAR:", err);
+  }
+
   client.once("ready", async () => {
-    console.log("Client is ready no cap❌⛑");
+    console.log("Client is ready");
     startTasksScheduler();
   });
 };
