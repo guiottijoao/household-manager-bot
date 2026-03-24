@@ -6,7 +6,7 @@ const { Client, LocalAuth } = pkg;
 const client = new Client({
   puppeteer: {
     executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium",
+      "/usr/bin/chromium",
     headless: true,
     args: [
       "--no-sandbox",
@@ -32,13 +32,13 @@ client.on("qr", (qr) => {
 
 export const initWhatsapp = () => {
   console.log("Initializing Whatsapp..");
-
+  
+  client.initialize();
   client.once("ready", async () => {
     console.log("Client is ready no cap❌⛑");
     startTasksScheduler();
   });
-  
-  client.initialize();
+
 };
 
 export default client;
