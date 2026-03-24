@@ -5,19 +5,23 @@ import { startTasksScheduler } from "../services/scheduler.js";
 const { Client, LocalAuth } = pkg;
 const client = new Client({
   puppeteer: {
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium",
+    executablePath:
+      process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium",
     headless: true,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
       "--disable-gpu",
+      "--no-zygote",
+      "--single-process",
+      "--disable-extensions",
     ],
   },
-  authStrategy: new LocalAuth({
-    clientId: "household-manager",
-    dataPath: "./.wwebjs_auth",
-  }),
+  // authStrategy: new LocalAuth({
+    // clientId: "household-manager",
+    // dataPath: "./.wwebjs_auth",
+  // }),
 });
 
 client.on("qr", (qr) => {
