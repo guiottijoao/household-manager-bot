@@ -19,21 +19,27 @@ const date = new Date();
 const cronScheduleExpression = `* * * * ${date.getDay()}`;
 
 export function startTasksScheduler() {
+  if (!client || !client.info || !client.info.wid) {
+    console.error(
+      "⚠️ Erro: Tentativa de envio negada. O cliente WhatsApp ainda não está pronto.",
+    );
+    return;
+  }
   cron.schedule(cronScheduleExpression, async () => {
     console.log("⏰ Running automatic tasks sending..");
-    
+
     const today = weekDays[date.getDay()];
-    
+
     try {
       const todaysTasks = await prisma.task.findMany({
         where: {
           day: today,
         },
       });
-      
+
       if (!todaysTasks || todaysTasks.length === 0)
         return "🧘‍♂️ Bom dia!\nNenhuma tarefa para hoje, aproveitem o descanso.";
-      
+
       const formattedTasks = todaysTasks.map((task) => taskFormatter(task));
       const header = "🌻 Bom dia, pessoal!\n\n📌 _Tarefas de hoje:_\n\n";
       const tasksMessageBody = formattedTasks.join("\n\n");
