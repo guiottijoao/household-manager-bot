@@ -27,6 +27,7 @@ const client = new Client({
 client.on("qr", (qr) => {
   console.log("QR RECIEVED TYPE SHIII");
   qrcode.generate(qr, { small: true });
+  console.log('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + qr);
 });
 
 export const initWhatsapp = () => {
