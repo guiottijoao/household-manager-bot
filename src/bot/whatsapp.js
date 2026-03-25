@@ -12,16 +12,18 @@ const client = new Client({
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
-      "--disable-gpu",
       "--no-zygote",
-      "--single-process",
+      "--no-first-run",
+      "--disable-gpu",
       "--disable-extensions",
+      "--disable-software-rasterizer",
+      "--window-size=1280,720",
     ],
   },
-  // authStrategy: new LocalAuth({
-    // clientId: "household-manager",
-    // dataPath: "./.wwebjs_auth",
-  // }),
+  authStrategy: new LocalAuth({
+    clientId: "household-manager",
+    dataPath: "./.wwebjs_auth",
+  }),
 });
 
 client.on("qr", (qr) => {
@@ -37,7 +39,11 @@ client.on("auth_failure", (msg) => {
 });
 
 client.on("disconnected", (reason) => {
-  console.log("DISCONNECTED:", reason);
+  console.warn("⚠️ WhatsApp desconectado:", reason);
+  console.log("🔄 Tentando reinicializar em 5 segundos...");
+  setTimeout(() => {
+    client.initialize();
+  }, 5000);
 });
 
 export const initWhatsapp = async () => {
