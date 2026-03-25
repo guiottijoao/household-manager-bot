@@ -15,6 +15,7 @@ const client = new Client({
       "--no-zygote",
       "--no-first-run",
       "--disable-gpu",
+      "--single-process",
       "--disable-extensions",
       "--disable-software-rasterizer",
       "--window-size=1280,720",
