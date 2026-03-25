@@ -14,7 +14,7 @@ const weekDays = {
   6: "SATURDAY",
 };
 
-const cronScheduleExpression = `* * * * ${date.getDay()}`;
+const cronScheduleExpression = `* * * * *`;
 
 export function startTasksScheduler() {
   if (!client || !client.info || !client.info.wid) {
