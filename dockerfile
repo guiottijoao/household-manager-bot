@@ -1,31 +1,43 @@
-# Usando a versão estável do Node no Debian Bullseye (mais compatível com Chrome)
-FROM node:20-bullseye-slim
+FROM node:18-slim
 
-# Instala o Chromium e as dependências mínimas para o Puppeteer rodar
+# Instala Chromium e todas as dependências necessárias para Puppeteer
 RUN apt-get update && apt-get install -y \
     chromium \
-    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libx11-xcb1 \
+    libxcb-dri3-0 \
+    fonts-liberation \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
-# Define variáveis de ambiente para o Puppeteer não baixar o Chrome de novo
-# e apontar para o executável correto no Linux
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Diz ao Puppeteer para não baixar o Chromium próprio (usa o do sistema)
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 
-# Copia apenas os arquivos de dependências primeiro (otimiza o cache do Docker)
 COPY package*.json ./
-
-# Instala as dependências (incluindo o Prisma)
 RUN npm install
 
-# Copia o restante dos arquivos do projeto
-COPY . .
-
-# Gera o Prisma Client para o ambiente Linux do Docker
+# Gera o Prisma client
+COPY prisma ./prisma
 RUN npx prisma generate
 
-# Comando para iniciar a aplicação
-CMD ["npm", "start"]
+COPY . .
+
+EXPOSE 3000
+
+CMD ["node", "src/server.js"]
