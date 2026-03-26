@@ -6,19 +6,29 @@ const { Client, LocalAuth } = pkg;
 const client = new Client({
   puppeteer: {
     executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium",
+      process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium-browser",
     headless: true,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
+      "--single-process",
       "--no-zygote",
       "--no-first-run",
       "--disable-gpu",
-      "--single-process",
       "--disable-extensions",
       "--disable-software-rasterizer",
-      "--window-size=1280,720",
+      "--disable-default-apps",
+      "--disable-sync",
+      "--disable-translate",
+      "--hide-scrollbars",
+      "--metrics-recording-only",
+      "--mute-audio",
+      "--safebrowsing-disable-auto-update",
+      "--ignore-certificate-errors",
+      "--ignore-ssl-errors",
+      "--ignore-certificate-errors-spki-list",
+      "--js-flags=--max-old-space-size=128",
     ],
   },
   authStrategy: new LocalAuth({
