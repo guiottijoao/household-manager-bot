@@ -47,20 +47,17 @@ client.on("disconnected", (reason) => {
   }, 5000);
 });
 
-export const initWhatsapp = async () => {
+export const initWhatsapp = () => {
   console.log("Initializing Whatsapp..");
   console.log("Executando chromium em:", process.env.PUPPETEER_EXECUTABLE_PATH);
-
-  try {
-    await client.initialize();
-    console.log("Initialize chamado");
-  } catch (err) {
-    console.error("ERRO AO INICIALIZAR:", err);
-  }
 
   client.once("ready", async () => {
     console.log("Client is ready");
     startTasksScheduler();
+  });
+
+  client.initialize().catch((error) => {
+    console.error("ERRO AO INICIALIZAR:", error);
   });
 };
 
