@@ -6,7 +6,7 @@ const { Client, LocalAuth } = pkg;
 const client = new Client({
   puppeteer: {
     executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium-browser",
+      process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     headless: true,
     args: [
       "--no-sandbox",
