@@ -6,7 +6,7 @@ const { Client, LocalAuth } = pkg;
 const client = new Client({
   puppeteer: {
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-    headless: true,
+    headless: "shell",
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
