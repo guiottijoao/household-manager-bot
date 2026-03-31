@@ -14,7 +14,8 @@ const weekDays = {
   6: "SATURDAY",
 };
 
-const cronScheduleExpression = `* * * * *`;
+const cronScheduleExpression = `45 7 * * *`;
+const cronReminderExpression = `30 20 * * *`;
 
 export function startTasksScheduler() {
   if (!client || !client.info || !client.info.wid) {
@@ -26,7 +27,7 @@ export function startTasksScheduler() {
   cron.schedule(cronScheduleExpression, async () => {
     console.log("⏰ Running automatic tasks sending..");
 
-    const date = new Date()
+    const date = new Date();
     const today = weekDays[date.getDay()];
 
     try {
@@ -36,8 +37,13 @@ export function startTasksScheduler() {
         },
       });
 
-      if (!todaysTasks || todaysTasks.length === 0)
-        return "🧘‍♂️ Bom dia!\nNenhuma tarefa para hoje, aproveitem o descanso.";
+      if (!todaysTasks || todaysTasks.length === 0) {
+        await client.sendMessage(
+          groupChatId,
+          "🧘‍♂️ Bom dia!\nNenhuma tarefa para hoje, aproveitem o descanso.",
+        );
+        return;
+      }
 
       const formattedTasks = todaysTasks.map((task) => taskFormatter(task));
       const header = "🌻 Bom dia, pessoal!\n\n📌 _Tarefas de hoje:_\n\n";
@@ -46,6 +52,34 @@ export function startTasksScheduler() {
       const groupChatId = process.env.GROUPCHAT_ID;
 
       await client.sendMessage(groupChatId, message);
+      console.log("✅ Message sent successfully.");
+    } catch (error) {
+      console.error("❌ Erro in scheduler:", error);
+    }
+  });
+
+  cron.schedule(cronReminderExpression, async () => {
+    console.log("⏰ Running tasks reminder..");
+
+    const date = new Date();
+    const today = weekDays[date.getDay()];
+
+    try {
+      const todaysTasks = await prisma.task.findMany({
+        where: {
+          day: today,
+        },
+      });
+
+      if (!todaysTasks || todaysTasks.length === 0) return;
+
+      const formattedTasks = todaysTasks.map((task) => taskFormatter(task));
+      const reminderHeader = "🌙 Lembrete!\n\n📌 _Tarefas de hoje:_\n\n";
+      const tasksMessageBody = formattedTasks.join("\n\n");
+      const reminder = reminderHeader + tasksMessageBody;
+      const groupChatId = process.env.GROUPCHAT_ID;
+
+      await client.sendMessage(groupChatId, reminder);
       console.log("✅ Message sent successfully.");
     } catch (error) {
       console.error("❌ Erro in scheduler:", error);
