@@ -7,6 +7,7 @@ const client = new Client({
   puppeteer: {
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     headless: "shell",
+    protocolTimeout: 120000,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -54,7 +55,6 @@ client.on("auth_failure", (msg) => {
   console.log("AUTH FAILURE:", msg);
 });
 
-
 client.on("disconnected", (reason) => {
   console.warn("⚠️ WhatsApp desconectado:", reason);
   console.log("🔄 Tentando reinicializar em 5 segundos...");
@@ -66,12 +66,12 @@ client.on("disconnected", (reason) => {
 export const initWhatsapp = () => {
   console.log("Initializing Whatsapp..");
   console.log("Executando chromium em:", process.env.PUPPETEER_EXECUTABLE_PATH);
-  
+
   client.once("ready", async () => {
     console.log("Client is ready");
     startTasksScheduler();
   });
-  
+
   client.initialize().catch((error) => {
     console.error("ERRO AO INICIALIZAR:", error);
   });
