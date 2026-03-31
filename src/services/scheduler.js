@@ -14,10 +14,8 @@ const weekDays = {
   6: "SATURDAY",
 };
 
-// const cronScheduleExpression = `45 7 * * *`;
-// const cronReminderExpression = `30 20 * * *`;
-const cronScheduleExpression = `54 20 * * *`;
-const cronReminderExpression = `55 20 * * *`;
+const cronScheduleExpression = `45 7 * * *`;
+const cronReminderExpression = `30 20 * * *`;
 
 export function startTasksScheduler() {
   if (!client || !client.info || !client.info.wid) {
