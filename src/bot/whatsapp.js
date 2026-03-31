@@ -5,8 +5,7 @@ import { startTasksScheduler } from "../services/scheduler.js";
 const { Client, LocalAuth } = pkg;
 const client = new Client({
   puppeteer: {
-    executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     headless: true,
     args: [
       "--no-sandbox",
@@ -37,9 +36,15 @@ const client = new Client({
   }),
 });
 
+let lastQR = null;
+
 client.on("qr", (qr) => {
-  console.log("QR RECIEVED TYPE SHIII");
+  console.log(
+    "QR RECIEVED TYPE SHIII, generated at: ",
+    new Date().toLocaleTimeString(),
+  );
   qrcode.generate(qr, { small: true });
+  lastQR = qr;
   console.log(
     "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + qr,
   );
@@ -48,6 +53,7 @@ client.on("qr", (qr) => {
 client.on("auth_failure", (msg) => {
   console.log("AUTH FAILURE:", msg);
 });
+
 
 client.on("disconnected", (reason) => {
   console.warn("⚠️ WhatsApp desconectado:", reason);
@@ -60,15 +66,16 @@ client.on("disconnected", (reason) => {
 export const initWhatsapp = () => {
   console.log("Initializing Whatsapp..");
   console.log("Executando chromium em:", process.env.PUPPETEER_EXECUTABLE_PATH);
-
+  
   client.once("ready", async () => {
     console.log("Client is ready");
     startTasksScheduler();
   });
-
+  
   client.initialize().catch((error) => {
     console.error("ERRO AO INICIALIZAR:", error);
   });
 };
 
 export default client;
+export const getQR = () => lastQR;
