@@ -18,17 +18,14 @@ const TaskController = {
   async getTasksByDay(req, res) {
     const { day } = req.params;
     try {
-      const task = await prisma.task.findMany({
+      const tasks = await prisma.task.findMany({
         where: {
-          day: day.toUppperCase(),
+          day: day.toUpperCase(),
         },
       });
 
-      return res.json(task);
+      return res.json(tasks);
     } catch (error) {
-      if (!task) {
-        return res.status(404).json({ error: "Task no found." });
-      }
       console.error("Error trying to find task", error);
       return res.status(500).json({ error: "Internal server error." });
     }

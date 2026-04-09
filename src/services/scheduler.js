@@ -1,6 +1,6 @@
 import prisma from "../database/client.js";
 import taskFormatter from "../utils/formatter.js";
-import client from "../bot/whatsapp.js";
+import { getSock } from "../bot/whatsapp.js";
 import cron from "node-cron";
 import "dotenv/config";
 
@@ -17,13 +17,23 @@ const weekDays = {
 const cronScheduleExpression = `45 7 * * *`;
 const cronReminderExpression = `30 20 * * *`;
 
-export function startTasksScheduler() {
-  if (!client || !client.info || !client.info.wid) {
-    console.error(
-      "⚠️ Erro: Tentativa de envio negada. O cliente WhatsApp ainda não está pronto.",
-    );
+async function sendMessage(jid, text) {
+  const sock = getSock();
+  if (!sock) {
+    console.error("⚠️ WhatsApp client not available.");
     return;
   }
+  await sock.sendMessage(jid, { text });
+}
+
+export function startTasksScheduler() {
+  const groupChatId = process.env.GROUPCHAT_ID;
+
+  if (!groupChatId) {
+    console.error("⚠️ GROUPCHAT_ID not set in environment.");
+    return;
+  }
+
   cron.schedule(cronScheduleExpression, async () => {
     console.log("⏰ Running automatic tasks sending..");
 
@@ -32,13 +42,11 @@ export function startTasksScheduler() {
 
     try {
       const todaysTasks = await prisma.task.findMany({
-        where: {
-          day: today,
-        },
+        where: { day: today },
       });
 
       if (!todaysTasks || todaysTasks.length === 0) {
-        await client.sendMessage(
+        await sendMessage(
           groupChatId,
           "🧘‍♂️ Bom dia!\nNenhuma tarefa para hoje, aproveitem o descanso.",
         );
@@ -49,9 +57,8 @@ export function startTasksScheduler() {
       const header = "🌻 Bom dia, pessoal!\n\n📌 _Tarefas de hoje:_\n\n";
       const tasksMessageBody = formattedTasks.join("\n\n");
       const message = header + tasksMessageBody;
-      const groupChatId = process.env.GROUPCHAT_ID;
 
-      await client.sendMessage(groupChatId, message);
+      await sendMessage(groupChatId, message);
       console.log("✅ Message sent successfully.");
     } catch (error) {
       console.error("❌ Erro in scheduler:", error);
@@ -66,9 +73,7 @@ export function startTasksScheduler() {
 
     try {
       const todaysTasks = await prisma.task.findMany({
-        where: {
-          day: today,
-        },
+        where: { day: today },
       });
 
       if (!todaysTasks || todaysTasks.length === 0) return;
@@ -77,9 +82,8 @@ export function startTasksScheduler() {
       const reminderHeader = "🌙 Lembrete!\n\n📌 _Tarefas de hoje:_\n\n";
       const tasksMessageBody = formattedTasks.join("\n\n");
       const reminder = reminderHeader + tasksMessageBody;
-      const groupChatId = process.env.GROUPCHAT_ID;
 
-      await client.sendMessage(groupChatId, reminder);
+      await sendMessage(groupChatId, reminder);
       console.log("✅ Message sent successfully.");
     } catch (error) {
       console.error("❌ Erro in scheduler:", error);

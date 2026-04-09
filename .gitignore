@@ -3,6 +3,8 @@ dev.db
 prisma/dev.db-journal
 .wwebjs_auth
 .wwebjs_cache
+.baileys_auth
+baileys_store.json
 
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node

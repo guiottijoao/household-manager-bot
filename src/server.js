@@ -1,7 +1,6 @@
 import express from "express";
 import "dotenv/config";
-import { initWhatsapp } from "./bot/whatsapp.js";
-import { getQR } from "./bot/whatsapp.js";
+import { initWhatsapp, getQR } from "./bot/whatsapp.js";
 import routes from "./routes/task.js";
 
 const app = express();

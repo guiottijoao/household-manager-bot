@@ -1,80 +1,65 @@
-import pkg from "whatsapp-web.js";
+import makeWASocket, {
+  useMultiFileAuthState,
+  DisconnectReason,
+} from "@whiskeysockets/baileys";
 import qrcode from "qrcode-terminal";
 import { startTasksScheduler } from "../services/scheduler.js";
 
-const { Client, LocalAuth } = pkg;
-const client = new Client({
-  puppeteer: {
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-    headless: "shell",
-    protocolTimeout: 120000,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--no-zygote",
-      "--no-first-run",
-      "--disable-gpu",
-      "--disable-extensions",
-      "--disable-software-rasterizer",
-      "--disable-default-apps",
-      "--disable-sync",
-      "--disable-translate",
-      "--hide-scrollbars",
-      "--metrics-recording-only",
-      "--mute-audio",
-      "--safebrowsing-disable-auto-update",
-      "--ignore-certificate-errors",
-      "--ignore-ssl-errors",
-      "--ignore-certificate-errors-spki-list",
-      "--js-flags=--max-old-space-size=128",
-    ],
-  },
-  authStrategy: new LocalAuth({
-    clientId: "household-manager",
-    dataPath: "./.wwebjs_auth",
-  }),
-});
-
 let lastQR = null;
+let sock = null;
 
-client.on("qr", (qr) => {
-  console.log(
-    "QR RECIEVED TYPE SHIII, generated at: ",
-    new Date().toLocaleTimeString(),
-  );
-  qrcode.generate(qr, { small: true });
-  lastQR = qr;
-  console.log(
-    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + qr,
-  );
-});
+export const getSock = () => sock;
+export const getQR = () => lastQR;
 
-client.on("auth_failure", (msg) => {
-  console.log("AUTH FAILURE:", msg);
-});
+async function connectToWhatsApp() {
+  const { state, saveCreds } = await useMultiFileAuthState("./.baileys_auth");
 
-client.on("disconnected", (reason) => {
-  console.warn("⚠️ WhatsApp desconectado:", reason);
-  console.log("🔄 Tentando reinicializar em 5 segundos...");
-  setTimeout(() => {
-    client.initialize();
-  }, 5000);
-});
-
-export const initWhatsapp = () => {
-  console.log("Initializing Whatsapp..");
-  console.log("Executando chromium em:", process.env.PUPPETEER_EXECUTABLE_PATH);
-
-  client.once("ready", async () => {
-    console.log("Client is ready");
-    startTasksScheduler();
+  sock = makeWASocket({
+    auth: state,
   });
 
-  client.initialize().catch((error) => {
-    console.error("ERRO AO INICIALIZAR:", error);
+  sock.ev.on("connection.update", (update) => {
+    const { qr, connection, lastDisconnect } = update;
+
+    if (qr) {
+      console.log("QR received at:", new Date().toLocaleTimeString());
+      qrcode.generate(qr, { small: true });
+      lastQR = qr;
+      console.log(
+        "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + qr,
+      );
+    }
+
+    if (connection === "open") {
+      console.log("Client is ready");
+      startTasksScheduler();
+    }
+
+    if (connection === "close") {
+      const shouldReconnect =
+        lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+
+      console.warn("⚠️ WhatsApp disconnected:", lastDisconnect?.error?.message);
+
+      if (shouldReconnect) {
+        console.log("🔄 Reconnecting in 5 seconds...");
+        setTimeout(connectToWhatsApp, 5000);
+      } else {
+        console.log("Logged out. Scan QR again.");
+      }
+    }
   });
+
+  sock.ev.on("creds.update", saveCreds);
+}
+
+export const initWhatsapp = async () => {
+  console.log("Initializing WhatsApp...");
+  await connectToWhatsApp();
 };
 
-export default client;
-export const getQR = () => lastQR;
+// Allow running directly: node src/bot/whatsapp.js
+const isMain = process.argv[1]?.endsWith("whatsapp.js");
+if (isMain) {
+  initWhatsapp();
+}
